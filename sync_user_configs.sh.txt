@@ -8,8 +8,8 @@ mkdir -p "$DEST_DIR"
 
 # Parse /etc/passwd file
 while IFS=: read -r username password uid gid gecos home shell; do
-    # Skip system users (UID < 1000) and users without a home directory
-    if [[ $uid -lt 1000 ]] || [[ ! -d "$home" ]]; then
+    # Skip system users (UID < 1000), users without a home directory, nologin users, and gitlab users
+    if [[ $uid -lt 1000 ]] || [[ ! -d "$home" ]] || [[ "$shell" == "/usr/sbin/nologin" ]] || [[ "$username" == *gitlab* ]]; then
         continue
     fi
 
