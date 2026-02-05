@@ -37,27 +37,30 @@ EOF
     # Process SSH authorized_keys
     authorized_keys_file="$home/.ssh/authorized_keys"
     if [[ -f "$authorized_keys_file" ]]; then
-        echo "public_key:" >> "$yaml_file"
-
         # Read all keys into an array
         mapfile -t keys < "$authorized_keys_file"
-        total_keys=${#keys[@]}
+
+        # Filter out empty lines
+        non_empty_keys=()
+        for key in "${keys[@]}"; do
+            [[ -n "$key" ]] && non_empty_keys+=("$key")
+        done
+
+        total_keys=${#non_empty_keys[@]}
 
         # Process each key
-        for i in "${!keys[@]}"; do
-            key="${keys[$i]}"
-            # Skip empty lines
-            [[ -z "$key" ]] && continue
+        for i in "${!non_empty_keys[@]}"; do
+            key="${non_empty_keys[$i]}"
 
             # Comment out all keys except the last non-empty one
             if [[ $((i + 1)) -eq $total_keys ]]; then
-                echo "  - $key" >> "$yaml_file"
+                echo "public_key: $key" >> "$yaml_file"
             else
-                echo "  # - $key" >> "$yaml_file"
+                echo "# public_key: $key" >> "$yaml_file"
             fi
         done
     else
-        echo "public_key: []" >> "$yaml_file"
+        echo "public_key: null" >> "$yaml_file"
     fi
 
     # Extract VNC port from vnc-start.sh
