@@ -64,7 +64,7 @@ EOF
     vnc_start_file="$home/vnc-start.sh"
     if [[ -f "$vnc_start_file" ]]; then
         # Extract the :XX port number from vncserver command
-        vnc_port=$(grep -oP '(?<=vncserver.*:)\d+' "$vnc_start_file" | head -n 1)
+        vnc_port=$(grep 'vncserver' "$vnc_start_file" | sed -n 's/.*:\([0-9][0-9]*\).*/\1/p' | head -n 1)
         if [[ -n "$vnc_port" ]]; then
             echo "vnc_port: $vnc_port" >> "$yaml_file"
         else
@@ -79,3 +79,4 @@ EOF
 done < /etc/passwd
 
 echo "YAML config sync complete!"
+
